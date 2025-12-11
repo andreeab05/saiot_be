@@ -29,7 +29,7 @@ app.add_middleware(
 )
 
 client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
-write_api = client.write_api(write_options=None)
+write_api = client.write_api()
 
 class Submission(BaseModel):
     value: int = Field(..., ge=1, le=10, description="1..10 score")
