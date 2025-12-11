@@ -20,14 +20,24 @@ if not INFLUX_URL or not INFLUX_TOKEN or not INFLUX_ORG:
 app = FastAPI(title="Public Submit API")
 
 # CORS: allow your frontend origin(s)
-FRONTEND_ORIGINS = os.getenv("FRONTEND_ORIGINS", "*").split(",")  # set to your deployed frontend URL(s)
+# FRONTEND_ORIGINS = os.getenv("FRONTEND_ORIGINS", "*").split(",")  # set to your deployed frontend URL(s)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=FRONTEND_ORIGINS,
+#     allow_methods=["GET", "POST", "OPTIONS"],
+#     allow_headers=["*"],
+# )
+origins = [    # dev frontend
+    "https://saiot-fe.vercel.app/"  # production frontend
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=FRONTEND_ORIGINS,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_origins=origins,       # or ["*"] for testing
+    allow_credentials=True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
-
 client = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
 write_api = client.write_api()
 
