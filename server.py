@@ -46,7 +46,7 @@ async def health():
     return {"ok": True}
 
 @app.post("/api/submit")
-async def submit(payload: Submission, None = Header(None)):
+async def submit(payload: Submission):
 
     # Create InfluxDB point
     p = Point("fatigue") \
