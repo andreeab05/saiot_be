@@ -80,11 +80,14 @@ async def submit(payload: Submission):
     )
 
     # Create InfluxDB point
-    p = Point("fatigue") \
-        .field("value", int(payload.value)) 
-        .tag("browser", browser)  
+    p = (
+        Point("fatigue")
+        .field("value", int(payload.value))
+        .tag("browser", browser)
         .tag("source", payload.label or "anon")
         .tag("host", socket.gethostname())
+    )
+
 
     # if payload.meta and isinstance(payload.meta, dict):
     #     ua = payload.meta.get("userAgent")
