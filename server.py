@@ -9,6 +9,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def extract_browser(user_agent: str | None) -> str:
+    if not user_agent:
+        return "Unknown"
+
+    ua = user_agent.lower()
+
+    if "edg/" in ua:
+        return "Edge"
+    if "chrome/" in ua and "safari/" in ua:
+        return "Chrome"
+    if "firefox/" in ua:
+        return "Firefox"
+    if "safari/" in ua and "chrome/" not in ua:
+        return "Safari"
+
+    return "Other"
+
+
 INFLUX_URL = os.getenv("INFLUX_URL")  # e.g. https://us-west-2-1.aws.cloud2.influxdata.com
 INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "")
@@ -57,17 +75,21 @@ async def health():
 
 @app.post("/api/submit")
 async def submit(payload: Submission):
+    browser = extract_browser(
+        payload.meta.get("userAgent") if payload.meta else None
+    )
 
     # Create InfluxDB point
     p = Point("fatigue") \
-        .field("value", int(payload.value)) \
-        .tag("source", payload.label or "anon") \
+        .field("value", int(payload.value)) 
+        .tag("browser", browser)  
+        .tag("source", payload.label or "anon")
         .tag("host", socket.gethostname())
 
-    if payload.meta and isinstance(payload.meta, dict):
-        ua = payload.meta.get("userAgent")
-        if ua:
-            p.field("ua", str(ua)[:512])
+    # if payload.meta and isinstance(payload.meta, dict):
+    #     ua = payload.meta.get("userAgent")
+    #     if ua:
+    #         p.field("ua", str(ua)[:512])
 
     # Write (non-blocking buffer)
     try:
